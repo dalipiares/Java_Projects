@@ -1,0 +1,45 @@
+@startuml
+class Main {
+    +main(args: String[])
+}
+
+class Parkhaus {
+    -freiePlaetze: int
+    -preisProStunde: double
+    -eingangsschranke: Eingangsschranke
+    -ausgangsschranke: Ausgangsschranke
+    -kasse: Kasse
+    +Parkhaus(freiePlaetze: int, preisProStunde: double)
+    +ticketErstellen(): Ticket
+    +ticketBezahlen(ticket: Ticket)
+    +anzeigenFreiePlaetze()
+    +kostenBerechnen(parkDauer: int): double
+    +ausgangSchrankeOeffnen(ticket: Ticket)
+}
+
+class Kasse {
+    +ticketBezahlen(ticket: Ticket)
+}
+
+class Eingangsschranke {
+    +oeffnen()
+}
+
+class Ausgangsschranke {
+    +oeffnen()
+}
+
+class Ticket {
+    -bezahlt: boolean
+    +Ticket()
+    +bezahlen()
+    +istBezahlt(): boolean
+}
+
+Main --> Parkhaus : Erstelle Instanz
+Parkhaus "1" o-- "1" Kasse : Aggregation
+Parkhaus "1" o-- "1" Eingangsschranke : Aggregation
+Parkhaus "1" o-- "1" Ausgangsschranke : Aggregation
+Parkhaus "1" *-- "0..*" Ticket : Komposition
+Kasse --> Ticket : Zahlungsabwicklung
+@enduml
