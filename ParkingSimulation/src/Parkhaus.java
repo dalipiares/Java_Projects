@@ -4,13 +4,19 @@ public class Parkhaus {
     Eingangsschranke eingangsschranke;
     Ausgangsschranke ausgangsschranke;
     Kasse kasse;
+    AusgabeInterface ausgabe;
 
-    public Parkhaus(int freiePlaetze, double preisProStunde) {
+    public Parkhaus(int freiePlaetze, double preisProStunde, AusgabeInterface ausgabe) {
         this.freiePlaetze = freiePlaetze;
         this.preisProStunde = preisProStunde;
         this.eingangsschranke = new Eingangsschranke();
         this.ausgangsschranke = new Ausgangsschranke();
         this.kasse = new Kasse();
+        this.ausgabe = ausgabe;
+    }
+
+    public AusgabeInterface getAusgabe() {
+        return ausgabe;
     }
 
     public Ticket ticketErstellen() {
@@ -20,17 +26,22 @@ public class Parkhaus {
             eingangsschranke.oeffnen();
             return ticket;
         } else {
-            System.out.println("Keine freien Plätze verfügbar.");
+            ausgabe.printKeineFreienPlaetze();
             return null;
         }
     }
 
+    public void platzFreigeben() {
+        freiePlaetze++;
+    }
+
     public void ticketBezahlen(Ticket ticket) {
         kasse.ticketBezahlen(ticket);
+        ausgabe.printTicketBezahlt();
     }
 
     public void anzeigenFreiePlaetze() {
-        System.out.println("Freie Plätze: " + freiePlaetze);
+        ausgabe.printFreiePlaetze(freiePlaetze);
     }
 
     public double kostenBerechnen(int parkDauer) {
@@ -40,8 +51,9 @@ public class Parkhaus {
     public void ausgangSchrankeOeffnen(Ticket ticket) {
         if (ticket.istBezahlt()) {
             ausgangsschranke.oeffnen();
+            platzFreigeben();
         } else {
-            System.out.println("Ticket ist nicht bezahlt. Schranke bleibt geschlossen.");
+            ausgabe.printTicketNichtBezahlt();
         }
     }
 }
