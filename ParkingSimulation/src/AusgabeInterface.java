@@ -1,3 +1,4 @@
+
 public interface AusgabeInterface {
     void printMenue();
     void printKeineFreienPlaetze();

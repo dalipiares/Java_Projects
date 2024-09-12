@@ -1,5 +1,7 @@
+import java.util.function.Consumer;
+
 public class Ausgangsschranke {
-    public void oeffnen() {
+    public static final Consumer<Void> oeffnen = v -> {
         // Keine Ausgabe mehr hier
-    }
+    };
 }

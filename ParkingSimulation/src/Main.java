@@ -2,53 +2,66 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-
         try (Scanner scanner = new Scanner(System.in)) {
-            Parkhaus parkhaus = new Parkhaus(100, 2.5, new KonsoleAusgabe());
+            AusgabeInterface ausgabe = new KonsoleAusgabe();
+            Parkhaus parkhaus = new Parkhaus(
+                    100,
+                    2.5,
+                    ausgabe,
+                    Eingangsschranke.oeffnen,
+                    Ausgangsschranke.oeffnen,
+                    Kasse.ticketBezahlen
+            );
+
             Ticket currentTicket = null;
             while (true) {
-                parkhaus.getAusgabe().printMenue();
+                ausgabe.printMenue();
                 System.out.print("Wähle eine Option: ");
-
-
                 int choice = scanner.nextInt();
 
-                if (choice == 1) {
-                    currentTicket = parkhaus.ticketErstellen();
-                    if (currentTicket == null) {
-                        parkhaus.getAusgabe().printKeineFreienPlaetze();
-                    } else {
-                        parkhaus.getAusgabe().printTicketErstellt();
-                    }
-                } else if (choice == 2) {
-                    parkhaus.anzeigenFreiePlaetze();
-                } else if (choice == 3) {
-                    if (currentTicket == null) {
-                        parkhaus.getAusgabe().printUngueltigeOption();
-                    } else {
-                        parkhaus.getAusgabe().printKostenBerechnen();
-                        int parkDauer = scanner.nextInt();
-                        double kosten = parkhaus.kostenBerechnen(parkDauer);
-                        parkhaus.getAusgabe().printKosten(kosten);
-                    }
-                } else if (choice == 4) {
-                    if (currentTicket == null) {
-                        parkhaus.getAusgabe().printUngueltigeOption();
-                    } else {
-                        parkhaus.ticketBezahlen(currentTicket);
-                    }
-                } else if (choice == 5) {
-                    if (currentTicket == null) {
-                        parkhaus.getAusgabe().printUngueltigeOption();
-                    } else {
-                        parkhaus.ausgangSchrankeOeffnen(currentTicket);
-                        currentTicket = null;
-                    }
-                } else if (choice == 6) {
-                    parkhaus.getAusgabe().printAusgang();
-                    break;
-                } else {
-                    parkhaus.getAusgabe().printUngueltigeOption();
+                switch (choice) {
+                    case 1:
+                        currentTicket = parkhaus.ticketErstellen().get();
+                        if (currentTicket == null) {
+                            ausgabe.printKeineFreienPlaetze();
+                        } else {
+                            ausgabe.printTicketErstellt();
+                        }
+                        break;
+                    case 2:
+                        parkhaus.anzeigenFreiePlaetze().run();
+                        break;
+                    case 3:
+                        if (currentTicket == null) {
+                            ausgabe.printUngueltigeOption();
+                        } else {
+                            ausgabe.printKostenBerechnen();
+                            int parkDauer = scanner.nextInt();
+                            double kosten = parkhaus.kostenBerechnen().apply(parkDauer);
+                            ausgabe.printKosten(kosten);
+                        }
+                        break;
+                    case 4:
+                        if (currentTicket == null) {
+                            ausgabe.printUngueltigeOption();
+                        } else {
+                            parkhaus.ticketBezahlen().accept(currentTicket);
+                        }
+                        break;
+                    case 5:
+                        if (currentTicket == null) {
+                            ausgabe.printUngueltigeOption();
+                        } else {
+                            parkhaus.ausgangSchrankeOeffnen().accept(currentTicket);
+                            currentTicket = null;
+                        }
+                        break;
+                    case 6:
+                        ausgabe.printAusgang();
+                        return;
+                    default:
+                        ausgabe.printUngueltigeOption();
+                        break;
                 }
             }
         }

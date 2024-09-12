@@ -1,5 +1,5 @@
 public class Ticket {
-    boolean bezahlt;
+    private boolean bezahlt;
 
     public Ticket() {
         this.bezahlt = false;

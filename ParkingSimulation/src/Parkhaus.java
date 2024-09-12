@@ -1,59 +1,71 @@
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 public class Parkhaus {
     int freiePlaetze;
     double preisProStunde;
-    Eingangsschranke eingangsschranke;
-    Ausgangsschranke ausgangsschranke;
-    Kasse kasse;
+    Consumer<Void> eingangsschrankeOeffnen;
+    Consumer<Void> ausgangsschrankeOeffnen;
+    Consumer<Ticket> ticketBezahlen;
     AusgabeInterface ausgabe;
 
-    public Parkhaus(int freiePlaetze, double preisProStunde, AusgabeInterface ausgabe) {
+    public Parkhaus(int freiePlaetze, double preisProStunde, AusgabeInterface ausgabe,
+                    Consumer<Void> eingangsschrankeOeffnen, Consumer<Void> ausgangsschrankeOeffnen,
+                    Consumer<Ticket> ticketBezahlen) {
         this.freiePlaetze = freiePlaetze;
         this.preisProStunde = preisProStunde;
-        this.eingangsschranke = new Eingangsschranke();
-        this.ausgangsschranke = new Ausgangsschranke();
-        this.kasse = new Kasse();
         this.ausgabe = ausgabe;
+        this.eingangsschrankeOeffnen = eingangsschrankeOeffnen;
+        this.ausgangsschrankeOeffnen = ausgangsschrankeOeffnen;
+        this.ticketBezahlen = ticketBezahlen;
     }
 
     public AusgabeInterface getAusgabe() {
         return ausgabe;
     }
 
-    public Ticket ticketErstellen() {
-        if (freiePlaetze > 0) {
-            freiePlaetze--;
-            Ticket ticket = new Ticket();
-            eingangsschranke.oeffnen();
-            return ticket;
-        } else {
-            ausgabe.printKeineFreienPlaetze();
-            return null;
-        }
+    public Supplier<Ticket> ticketErstellen() {
+        return () -> {
+            if (freiePlaetze > 0) {
+                freiePlaetze--;
+                Ticket ticket = new Ticket();
+                eingangsschrankeOeffnen.accept(null);
+                return ticket;
+            } else {
+                ausgabe.printKeineFreienPlaetze();
+                return null;
+            }
+        };
     }
 
-    public void platzFreigeben() {
-        freiePlaetze++;
+    public Runnable platzFreigeben() {
+        return () -> freiePlaetze++;
     }
 
-    public void ticketBezahlen(Ticket ticket) {
-        kasse.ticketBezahlen(ticket);
-        ausgabe.printTicketBezahlt();
+    public Consumer<Ticket> ticketBezahlen() {
+        return ticket -> {
+            ticketBezahlen.accept(ticket);
+            ausgabe.printTicketBezahlt();
+        };
     }
 
-    public void anzeigenFreiePlaetze() {
-        ausgabe.printFreiePlaetze(freiePlaetze);
+    public Runnable anzeigenFreiePlaetze() {
+        return () -> ausgabe.printFreiePlaetze(freiePlaetze);
     }
 
-    public double kostenBerechnen(int parkDauer) {
-        return parkDauer * preisProStunde;
+    public Function<Integer, Double> kostenBerechnen() {
+        return parkDauer -> parkDauer * preisProStunde;
     }
 
-    public void ausgangSchrankeOeffnen(Ticket ticket) {
-        if (ticket.istBezahlt()) {
-            ausgangsschranke.oeffnen();
-            platzFreigeben();
-        } else {
-            ausgabe.printTicketNichtBezahlt();
-        }
+    public Consumer<Ticket> ausgangSchrankeOeffnen() {
+        return ticket -> {
+            if (ticket.istBezahlt()) {
+                ausgangsschrankeOeffnen.accept(null);
+                platzFreigeben().run();
+            } else {
+                ausgabe.printTicketNichtBezahlt();
+            }
+        };
     }
 }

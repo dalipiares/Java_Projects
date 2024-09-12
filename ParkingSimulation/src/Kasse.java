@@ -1,5 +1,5 @@
+import java.util.function.Consumer;
+
 public class Kasse {
-    public void ticketBezahlen(Ticket ticket) {
-        ticket.bezahlen();
-    }
+    public static final Consumer<Ticket> ticketBezahlen = Ticket::bezahlen;
 }
